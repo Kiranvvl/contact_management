@@ -1,9 +1,9 @@
-import express from "express";
+﻿import express from "express";
 import dotenv from "dotenv";
-import bcrypt from "bcryptjs"; // ✅ Import bcrypt
-import cors from "cors"; // Add this import
-import User from "./models/User"; // ✅ Import User model
-import Contact from "./models/Contact";
+import bcrypt from "bcryptjs"; 
+import cors from "cors"; 
+import User from "./models/User"; 
+// import Contact from "./models/Contact";
 dotenv.config();
 
 import sequelize from "./config/db";
@@ -39,6 +39,29 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactRoutes);
+
+// ✅ HEALTH CHECK ENDPOINTS (ADDED HERE)
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    status: "healthy", 
+    timestamp: new Date(),
+    environment: process.env.NODE_ENV,
+    database: "connected"
+  });
+});
+
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "Contact Management API",
+    version: "1.0.0",
+    endpoints: {
+      auth: "/api/auth",
+      contacts: "/api/contacts",
+      health: "/api/health"
+    },
+    documentation: "Use /api/auth for authentication, /api/contacts for contact management"
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 
