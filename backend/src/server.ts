@@ -23,7 +23,8 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:5173", // Vite default
+    "http://localhost:5173",
+    "https://contact-manager-97.netlify.app"
   ];
   const origin = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
