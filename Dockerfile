@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY backend/package*.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install ALL dependencies (including dev for TypeScript)
+RUN npm install
 
 # Copy source code
 COPY backend/ ./
