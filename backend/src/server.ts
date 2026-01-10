@@ -2,24 +2,34 @@
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import cors from "cors";
-import User from "./models/User";
 
 import sequelize from "./config/db";
+import User from "./models/User";
 import authRoutes from "./routes/authRoutes";
 import contactRoutes from "./routes/contactRoutes";
 
-dotenv.config();
+/* ======================
+   ENV CONFIG
+====================== */
+const ENV = process.env.NODE_ENV || "development";
 
-const app = express();
+// Load environment variables based on environment
+if (ENV === "development") {
+  dotenv.config({ path: ".env.local" });
+} else {
+  dotenv.config(); // production
+}
 
 /* ======================
-   CORS CONFIG (FIXED)
+   EXPRESS SETUP
 ====================== */
+const app = express();
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:5173",
-  "https://contact-manager-97.netlify.app",
+  process.env.FRONTEND_URL, // deployed frontend
 ];
 
 app.use(
@@ -51,7 +61,7 @@ app.use("/api/contacts", contactRoutes);
 app.get("/api/health", (req, res) => {
   res.json({
     status: "healthy",
-    environment: process.env.NODE_ENV,
+    environment: ENV,
     timestamp: new Date(),
   });
 });
@@ -66,10 +76,8 @@ app.get("/", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
 /* ======================
-   CREATE ADMIN
+   CREATE ADMIN IF NOT EXISTS
 ====================== */
 const createAdminIfNotExists = async () => {
   try {
@@ -87,9 +95,8 @@ const createAdminIfNotExists = async () => {
       });
 
       console.log("✅ Admin user created");
-    } else {
-      console.log("ℹ️ Admin already exists");
     }
+    // No log if admin already exists to keep startup clean
   } catch (err) {
     console.error("❌ Admin creation failed:", err);
   }
@@ -98,13 +105,18 @@ const createAdminIfNotExists = async () => {
 /* ======================
    START SERVER
 ====================== */
+const PORT = process.env.PORT || 5000;
+
 const startServer = async () => {
   try {
+    // Sync database (alter tables if needed)
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced");
 
+    // Create admin only if it doesn't exist
     await createAdminIfNotExists();
 
+    // Start Express server
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
